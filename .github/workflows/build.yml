@@ -9,9 +9,8 @@ jobs:
         run: |
           unzip -o Battleground.zip || true
           rm -f Battleground.zip
-          ls -la
           PUB_DIR=$(find . -name "pubspec.yaml" -exec dirname {} \; | head -1)
-          echo "Found project at $PUB_DIR"
+          echo "Found at $PUB_DIR"
           if [ "$PUB_DIR" != "." ] && [ -n "$PUB_DIR" ]; then
             cp -r $PUB_DIR/* . || true
             cp -r $PUB_DIR/.* . 2>/dev/null || true
@@ -22,6 +21,11 @@ jobs:
           flutter-version: '3.22.0'
           channel: 'stable'
       - run: flutter pub get
+      - name: Fix old Gradle project
+        run: |
+          rm -rf android
+          flutter create --platforms=android --project-name kpk_battleground .
+          flutter pub get
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:
