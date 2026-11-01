@@ -5,13 +5,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: unzip -o Battleground.zip; rm Battleground.zip; if [ -d Battleground ]; then mv Battleground/* .; fi; ls
+      - name: Unzip and locate project
+        run: |
+          unzip -o Battleground.zip || true
+          rm -f Battleground.zip
+          ls -la
+          PUB_DIR=$(find . -name "pubspec.yaml" -exec dirname {} \; | head -1)
+          echo "Found project at $PUB_DIR"
+          if [ "$PUB_DIR" != "." ] && [ -n "$PUB_DIR" ]; then
+            cp -r $PUB_DIR/* . || true
+            cp -r $PUB_DIR/.* . 2>/dev/null || true
+          fi
+          ls -la
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.0'
+          channel: 'stable'
       - run: flutter pub get
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:
-          name: apk
+          name: kpk-battleground-apk
           path: build/app/outputs/flutter-apk/app-release.apk
